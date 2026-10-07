@@ -37,20 +37,99 @@ const initials = (name) =>
     .slice(0, 2)
     .toUpperCase();
 
-export default function Navbar({ query, onQueryChange, onMenu }) {
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [userOpen, setUserOpen] = useState(false);
+function Notifications({ items, onMarkAllRead }) {
+  const [open, setOpen] = useState(false);
+  const ref = useDismiss(open, setOpen);
+  const unread = items.filter((n) => n.unread).length;
+
+  return (
+    <div className="dropdown" ref={ref}>
+      <button
+        className="icon-btn"
+        aria-label={`Notifications${unread ? `, ${unread} unread` : ''}`}
+        aria-expanded={open}
+        aria-haspopup="true"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span aria-hidden="true">🔔</span>
+        {unread > 0 && <span className="badge" aria-hidden="true">{unread}</span>}
+      </button>
+      {open && (
+        <div className="menu menu-wide" role="menu">
+          <div className="menu-head">
+            <span>Notifications</span>
+            {unread > 0 && (
+              <button className="link-btn" onClick={onMarkAllRead}>
+                Mark all read
+              </button>
+            )}
+          </div>
+          <ul>
+            {items.map((n) => (
+              <li key={n.id} className={n.unread ? 'notif is-unread' : 'notif'} role="menuitem">
+                <span className="notif-dot" aria-hidden="true" />
+                <span>
+                  {n.text}
+                  <span className="notif-time">{n.time}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function UserMenu() {
+  const [open, setOpen] = useState(false);
+  const ref = useDismiss(open, setOpen);
+
+  return (
+    <div className="dropdown" ref={ref}>
+      <button
+        className="user-btn"
+        aria-label="Account menu"
+        aria-expanded={open}
+        aria-haspopup="true"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span className="avatar" aria-hidden="true">{initials(USER.name)}</span>
+        <span className="user-name">{USER.name}</span>
+        <span className="caret" aria-hidden="true">▾</span>
+      </button>
+      {open && (
+        <div className="menu" role="menu">
+          <div className="menu-head menu-user">
+            <span>{USER.name}</span>
+            <span className="muted">{USER.email}</span>
+          </div>
+          <ul>
+            {['Profile', 'Settings', 'Sign out'].map((item) => (
+              <li key={item}>
+                <button role="menuitem" className="menu-item" onClick={() => setOpen(false)}>
+                  {item}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// `showNotifications` limits the bell to the dashboard. Read state lives here so it
+// survives switching pages.
+export default function Navbar({ query, onQueryChange, onMenu, showNotifications }) {
   const [notifications, setNotifications] = useState(NOTIFICATIONS);
-  const notifRef = useDismiss(notifOpen, setNotifOpen);
-  const userRef = useDismiss(userOpen, setUserOpen);
-  const unread = notifications.filter((n) => n.unread).length;
 
   return (
     <header className="navbar">
       <button className="icon-btn menu-btn" onClick={onMenu} aria-label="Open navigation">
         ☰
       </button>
-      <a href="#" className="brand" onClick={(e) => e.preventDefault()}>
+      <a href="#/" className="brand">
         <span className="brand-mark" aria-hidden="true">A</span>
         <span className="brand-name">Acme Admin</span>
       </a>
@@ -67,81 +146,13 @@ export default function Navbar({ query, onQueryChange, onMenu }) {
       </form>
 
       <div className="navbar-actions">
-        <div className="dropdown" ref={notifRef}>
-          <button
-            className="icon-btn"
-            aria-label={`Notifications${unread ? `, ${unread} unread` : ''}`}
-            aria-expanded={notifOpen}
-            aria-haspopup="true"
-            onClick={() => {
-              setNotifOpen((o) => !o);
-              setUserOpen(false);
-            }}
-          >
-            <span aria-hidden="true">🔔</span>
-            {unread > 0 && <span className="badge" aria-hidden="true">{unread}</span>}
-          </button>
-          {notifOpen && (
-            <div className="menu menu-wide" role="menu">
-              <div className="menu-head">
-                <span>Notifications</span>
-                {unread > 0 && (
-                  <button
-                    className="link-btn"
-                    onClick={() => setNotifications((ns) => ns.map((n) => ({ ...n, unread: false })))}
-                  >
-                    Mark all read
-                  </button>
-                )}
-              </div>
-              <ul>
-                {notifications.map((n) => (
-                  <li key={n.id} className={n.unread ? 'notif is-unread' : 'notif'} role="menuitem">
-                    <span className="notif-dot" aria-hidden="true" />
-                    <span>
-                      {n.text}
-                      <span className="notif-time">{n.time}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-
-        <div className="dropdown" ref={userRef}>
-          <button
-            className="user-btn"
-            aria-label="Account menu"
-            aria-expanded={userOpen}
-            aria-haspopup="true"
-            onClick={() => {
-              setUserOpen((o) => !o);
-              setNotifOpen(false);
-            }}
-          >
-            <span className="avatar" aria-hidden="true">{initials(USER.name)}</span>
-            <span className="user-name">{USER.name}</span>
-            <span className="caret" aria-hidden="true">▾</span>
-          </button>
-          {userOpen && (
-            <div className="menu" role="menu">
-              <div className="menu-head menu-user">
-                <span>{USER.name}</span>
-                <span className="muted">{USER.email}</span>
-              </div>
-              <ul>
-                {['Profile', 'Settings', 'Sign out'].map((item) => (
-                  <li key={item}>
-                    <button role="menuitem" className="menu-item" onClick={() => setUserOpen(false)}>
-                      {item}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+        {showNotifications && (
+          <Notifications
+            items={notifications}
+            onMarkAllRead={() => setNotifications((ns) => ns.map((n) => ({ ...n, unread: false })))}
+          />
+        )}
+        <UserMenu />
       </div>
     </header>
   );
