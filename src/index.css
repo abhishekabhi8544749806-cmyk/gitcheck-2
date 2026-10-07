@@ -8,6 +8,7 @@
   --grid: #e1e0d9;
   --border: rgba(11, 11, 11, 0.1);
   --accent: #2a78d6;
+  --accent-text: #256abf;
   --accent-wash: rgba(42, 120, 214, 0.1);
   --hover: rgba(11, 11, 11, 0.04);
   --delta-up: #006300;
@@ -30,6 +31,7 @@
     --grid: #2c2c2a;
     --border: rgba(255, 255, 255, 0.1);
     --accent: #3987e5;
+    --accent-text: #5598e7;
     --accent-wash: rgba(57, 135, 229, 0.16);
     --hover: rgba(255, 255, 255, 0.05);
     --delta-up: #0ca30c;
@@ -49,6 +51,7 @@
   --grid: #2c2c2a;
   --border: rgba(255, 255, 255, 0.1);
   --accent: #3987e5;
+  --accent-text: #5598e7;
   --accent-wash: rgba(57, 135, 229, 0.16);
   --hover: rgba(255, 255, 255, 0.05);
   --delta-up: #0ca30c;
@@ -187,6 +190,36 @@ button {
   display: grid;
   place-items: center;
   box-shadow: 0 0 0 2px var(--surface);
+}
+
+.btn-primary {
+  height: 34px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.btn-secondary {
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--accent-text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-secondary:hover {
+  background: var(--accent-wash);
 }
 
 .user-btn {

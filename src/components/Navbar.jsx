@@ -81,7 +81,7 @@ function Notifications({ items, onMarkAllRead }) {
   );
 }
 
-function UserMenu() {
+function UserMenu({ onSignOut }) {
   const [open, setOpen] = useState(false);
   const ref = useDismiss(open, setOpen);
 
@@ -105,13 +105,18 @@ function UserMenu() {
             <span className="muted">{USER.email}</span>
           </div>
           <ul>
-            {['Profile', 'Settings', 'Sign out'].map((item) => (
+            {['Profile', 'Settings'].map((item) => (
               <li key={item}>
                 <button role="menuitem" className="menu-item" onClick={() => setOpen(false)}>
                   {item}
                 </button>
               </li>
             ))}
+            <li>
+              <button role="menuitem" className="menu-item" onClick={onSignOut}>
+                Sign out
+              </button>
+            </li>
           </ul>
         </div>
       )}
@@ -120,9 +125,10 @@ function UserMenu() {
 }
 
 // `showNotifications` limits the bell to the dashboard. Read state lives here so it
-// survives switching pages.
+// survives switching pages. Sign-in is local UI state only; there is no real auth yet.
 export default function Navbar({ query, onQueryChange, onMenu, showNotifications }) {
   const [notifications, setNotifications] = useState(NOTIFICATIONS);
+  const [signedIn, setSignedIn] = useState(true);
 
   return (
     <header className="navbar">
@@ -146,13 +152,24 @@ export default function Navbar({ query, onQueryChange, onMenu, showNotifications
       </form>
 
       <div className="navbar-actions">
-        {showNotifications && (
+        {signedIn && showNotifications && (
           <Notifications
             items={notifications}
             onMarkAllRead={() => setNotifications((ns) => ns.map((n) => ({ ...n, unread: false })))}
           />
         )}
-        <UserMenu />
+        {signedIn ? (
+          <UserMenu onSignOut={() => setSignedIn(false)} />
+        ) : (
+          <>
+            <button className="btn-secondary" onClick={() => setSignedIn(true)}>
+              Log in
+            </button>
+            <button className="btn-primary" onClick={() => setSignedIn(true)}>
+              Sign up
+            </button>
+          </>
+        )}
       </div>
     </header>
   );
