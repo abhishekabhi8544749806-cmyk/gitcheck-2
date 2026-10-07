@@ -11,10 +11,6 @@ export default function Sidebar({ open, onClose }) {
   return (
     <>
       <aside className={`sidebar${open ? ' is-open' : ''}`} aria-label="Main navigation">
-        <div className="brand">
-          <span className="brand-mark" aria-hidden="true">A</span>
-          <span>Acme Admin</span>
-        </div>
         <nav>
           <ul>
             {NAV.map((item) => (

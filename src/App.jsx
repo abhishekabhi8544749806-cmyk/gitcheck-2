@@ -22,17 +22,18 @@ export default function App() {
     { label: 'New customers', key: 'customers', format: fmtNumber },
   ];
 
+  const q = query.trim().toLowerCase();
+  const orders = q
+    ? recentOrders.filter((o) => `${o.id} ${o.customer} ${o.category}`.toLowerCase().includes(q))
+    : recentOrders;
+
   return (
+    <>
+    <Navbar query={query} onQueryChange={setQuery} onMenu={() => setNavOpen(true)} />
     <div className="layout">
       <Sidebar open={navOpen} onClose={() => setNavOpen(false)} />
       <div className="main">
-        <Topbar
-          range={range}
-          onRangeChange={setRange}
-          mode={mode}
-          onToggleTheme={toggle}
-          onMenu={() => setNavOpen(true)}
-        />
+        <Topbar range={range} onRangeChange={setRange} mode={mode} onToggleTheme={toggle} />
         <main className="content">
           <div className="kpi-grid">
             {kpis.map((k) => (

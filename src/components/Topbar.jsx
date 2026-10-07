@@ -4,12 +4,9 @@ export const RANGES = [
   { days: 90, label: '90 days' },
 ];
 
-export default function Topbar({ range, onRangeChange, mode, onToggleTheme, onMenu }) {
+export default function Topbar({ range, onRangeChange, mode, onToggleTheme }) {
   return (
     <header className="topbar">
-      <button className="icon-btn menu-btn" onClick={onMenu} aria-label="Open navigation">
-        ☰
-      </button>
       <div className="topbar-title">
         <h1>Overview</h1>
         <p className="muted">Store performance for the last {range} days</p>
