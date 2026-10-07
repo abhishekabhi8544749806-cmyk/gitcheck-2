@@ -56,6 +56,38 @@ function buildDaily() {
 
 export const daily = buildDaily();
 
+export const PRODUCTS = [
+  { sku: 'EL-104', name: 'Wireless Earbuds Pro', category: 'Electronics', price: 129, weight: 1.6, trend: 0.004 },
+  { sku: 'EL-221', name: 'Smart Watch S2', category: 'Electronics', price: 199, weight: 0.9, trend: 0.002 },
+  { sku: 'HK-310', name: 'Pour-Over Coffee Set', category: 'Home & Kitchen', price: 54, weight: 1.4, trend: -0.001 },
+  { sku: 'HK-118', name: 'Cast Iron Skillet', category: 'Home & Kitchen', price: 39, weight: 1.5, trend: 0.001 },
+  { sku: 'AP-502', name: 'Merino Crew Sweater', category: 'Apparel', price: 89, weight: 1.0, trend: 0.003 },
+  { sku: 'AP-415', name: 'Everyday Rain Jacket', category: 'Apparel', price: 119, weight: 0.6, trend: 0.005 },
+  { sku: 'SP-207', name: 'Yoga Mat Plus', category: 'Sports', price: 48, weight: 1.3, trend: -0.002 },
+  { sku: 'SP-330', name: 'Insulated Bottle 1L', category: 'Sports', price: 32, weight: 1.8, trend: 0.001 },
+  { sku: 'BE-150', name: 'Vitamin C Serum', category: 'Beauty', price: 36, weight: 1.6, trend: 0.002 },
+  { sku: 'BK-090', name: 'The Pragmatic Cook', category: 'Books', price: 28, weight: 1.2, trend: -0.001 },
+];
+
+// Units sold per product per day, aligned with `daily`. Separate seed so adding
+// products never shifts the other generated data.
+const productRand = mulberry32(7);
+const productDaily = daily.map((_, i) =>
+  PRODUCTS.map((p) => Math.round(p.weight * 9 * (1 + p.trend * i) * (0.75 + productRand() * 0.5)))
+);
+
+function topProducts(days) {
+  const unitsIn = (rows) => PRODUCTS.map((_, j) => rows.reduce((acc, r) => acc + r[j], 0));
+  const now = unitsIn(productDaily.slice(-days));
+  const prev = unitsIn(productDaily.slice(-days * 2, -days));
+  return PRODUCTS.map((p, j) => ({
+    ...p,
+    units: now[j],
+    revenue: now[j] * p.price,
+    prevRevenue: prev[j] * p.price,
+  })).sort((a, b) => b.revenue - a.revenue);
+}
+
 const sum = (rows, key) => rows.reduce((acc, r) => acc + r[key], 0);
 
 // Current window = last `days` rows; previous window = the `days` before it.
@@ -79,7 +111,13 @@ export function summarize(days) {
     value: current.reduce((acc, r) => acc + r.categories[name], 0),
   })).sort((a, b) => b.value - a.value);
 
-  return { series: current, now: totals(current), prev: totals(previous), byCategory };
+  return {
+    series: current,
+    now: totals(current),
+    prev: totals(previous),
+    byCategory,
+    products: topProducts(days),
+  };
 }
 
 const CUSTOMERS = [

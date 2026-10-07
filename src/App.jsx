@@ -6,6 +6,7 @@ import KpiCard from './components/KpiCard.jsx';
 import RevenueChart from './components/RevenueChart.jsx';
 import CategoryChart from './components/CategoryChart.jsx';
 import OrdersTable from './components/OrdersTable.jsx';
+import ProductCarousel from './components/ProductCarousel.jsx';
 import { recentOrders, summarize } from './data.js';
 import { fmtCents, fmtCurrency, fmtNumber } from './format.js';
 import { usePage } from './pages.js';
@@ -19,7 +20,7 @@ const KPIS = [
 ];
 
 function Dashboard({ range, colors, query }) {
-  const { series, now, prev, byCategory } = useMemo(() => summarize(range), [range]);
+  const { series, now, prev, byCategory, products } = useMemo(() => summarize(range), [range]);
 
   const q = query.trim().toLowerCase();
   const orders = q
@@ -44,6 +45,7 @@ function Dashboard({ range, colors, query }) {
         <RevenueChart data={series} colors={colors} />
         <CategoryChart data={byCategory} colors={colors} />
       </div>
+      <ProductCarousel products={products} />
       <OrdersTable orders={orders} query={q} />
     </>
   );
