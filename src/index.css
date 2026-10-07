@@ -189,6 +189,21 @@ button {
   box-shadow: 0 0 0 2px var(--surface);
 }
 
+.btn-primary {
+  height: 34px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+}
+
 .user-btn {
   display: flex;
   align-items: center;
