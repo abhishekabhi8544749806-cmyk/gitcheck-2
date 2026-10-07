@@ -56,6 +56,15 @@ function buildDaily() {
 
 export const daily = buildDaily();
 
+// Secondary metrics, merged into `daily`. Separate seed so they never shift the data above.
+const metricRand = mulberry32(99);
+for (const r of daily) {
+  r.sessions = Math.round(r.orders / (0.028 + metricRand() * 0.006));
+  r.refunds = Math.round(r.orders * (0.02 + metricRand() * 0.02));
+  r.returning = Math.round(r.orders * (0.35 + metricRand() * 0.1));
+  r.pending = Math.round(r.orders * (0.01 + metricRand() * 0.01));
+}
+
 export const PRODUCTS = [
   { sku: 'EL-104', name: 'Wireless Earbuds Pro', category: 'Electronics', price: 129, weight: 1.6, trend: 0.004 },
   { sku: 'EL-221', name: 'Smart Watch S2', category: 'Electronics', price: 199, weight: 0.9, trend: 0.002 },
@@ -103,6 +112,10 @@ export function summarize(days) {
       orders,
       aov: orders ? revenue / orders : 0,
       customers: sum(rows, 'customers'),
+      conversion: orders / sum(rows, 'sessions'),
+      refundRate: sum(rows, 'refunds') / orders,
+      returning: sum(rows, 'returning'),
+      pending: sum(rows, 'pending'),
     };
   };
 

@@ -8,7 +8,7 @@ import CategoryChart from './components/CategoryChart.jsx';
 import OrdersTable from './components/OrdersTable.jsx';
 import ProductCarousel from './components/ProductCarousel.jsx';
 import { recentOrders, summarize } from './data.js';
-import { fmtCents, fmtCurrency, fmtNumber } from './format.js';
+import { fmtCents, fmtCurrency, fmtNumber, fmtPercent } from './format.js';
 import { usePage } from './pages.js';
 import { useTheme } from './theme.js';
 
@@ -17,6 +17,10 @@ const KPIS = [
   { label: 'Orders', key: 'orders', format: fmtNumber },
   { label: 'Avg. order value', key: 'aov', format: fmtCents },
   { label: 'New customers', key: 'customers', format: fmtNumber },
+  { label: 'Conversion rate', key: 'conversion', format: fmtPercent, rate: true },
+  { label: 'Refund rate', key: 'refundRate', format: fmtPercent, rate: true, lowerIsBetter: true },
+  { label: 'Returning customers', key: 'returning', format: fmtNumber },
+  { label: 'Pending orders', key: 'pending', format: fmtNumber, lowerIsBetter: true },
 ];
 
 function Dashboard({ range, colors, query }) {
@@ -38,6 +42,8 @@ function Dashboard({ range, colors, query }) {
             current={now[k.key]}
             previous={prev[k.key]}
             format={k.format}
+            rate={k.rate}
+            lowerIsBetter={k.lowerIsBetter}
           />
         ))}
       </div>
