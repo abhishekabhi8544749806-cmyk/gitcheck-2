@@ -8,13 +8,15 @@ const STATUS = {
   failed: { label: 'Failed', icon: '✕' },
 };
 
-export default function OrdersTable({ orders }) {
+export default function OrdersTable({ orders, query }) {
   return (
     <section className="card" aria-labelledby="orders-title">
       <div className="card-head">
         <div>
           <h2 id="orders-title">Recent orders</h2>
-          <p className="muted">Latest {orders.length} orders</p>
+          <p className="muted" aria-live="polite">
+            {query ? `${orders.length} matching “${query}”` : `Latest ${orders.length} orders`}
+          </p>
         </div>
       </div>
       <div className="table-wrap">
@@ -30,6 +32,13 @@ export default function OrdersTable({ orders }) {
             </tr>
           </thead>
           <tbody>
+            {orders.length === 0 && (
+              <tr>
+                <td colSpan={6} className="muted empty">
+                  No orders match your search.
+                </td>
+              </tr>
+            )}
             {orders.map((o) => {
               const s = STATUS[o.status];
               return (
