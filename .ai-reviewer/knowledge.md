@@ -1,28 +1,32 @@
 # gitcheck-2 reviewer notes
 
 ## Architecture
-This is a Vite-powered React 18 admin dashboard, with `src/App.jsx` composing layout and feature components under `src/components/`. Dashboard data and aggregation are centralized in `src/data.js`, formatting in `src/format.js`, and theme state/palettes in `src/theme.js`. Recharts renders the revenue and category visualizations.
+
+This is a Vite-powered React 18 admin dashboard. `src/App.jsx` owns page-level state and composes navigation, dashboard cards, charts, product carousel, and orders table; reusable UI lives under `src/components/`. Data generation, aggregation, formatting, routing, and theme behavior are separated into `src/data.js`, `src/format.js`, `src/pages.js`, and `src/theme.js`.
 
 ## Conventions
-- Use functional components with default exports; feature components live in `src/components/` and are imported explicitly with `.jsx` extensions, as in `src/App.jsx`.
-- Keep derived dashboard values in memoized calculations: `App.jsx` uses `useMemo(() => summarize(range), [range])`.
-- Centralize display formatting in `src/format.js`; use `fmtCurrency`, `fmtCents`, `fmtNumber`, `fmtDay`, and `fmtTime` rather than ad hoc formatting in components.
-- Shared chart presentation belongs in `ChartTooltip.jsx`; both chart components provide formatter functions and chart-specific options.
-- Recharts colors must be passed as resolved hex values from `useTheme()` (`src/theme.js`), because SVG chart attributes do not consume CSS variables. Keep `theme.js` palettes synchronized with `src/index.css`.
-- Use stable data keys for rendered collections: `k.key` for KPI cards, channel/category names for charts, and `o.id` for order rows.
-- Accessibility is implemented alongside UI structure: sections use `aria-labelledby`, table headers use `scope="col"`, navigation uses `aria-current`, and decorative icons/swatches use `aria-hidden`.
-- Status and state must not rely on color alone. `OrdersTable.jsx` pairs each status color class with an icon and text; `RevenueChart.jsx` adds direct end labels to lines.
-- Styling is class-based, with inline styles reserved for dynamic chart dimensions and colors (for example, `style={{ height: 300 }}` and palette-driven swatches).
+
+- Use functional React components with ES module imports/exports; components are one-per-file under `src/components/` and use `.jsx` extensions, as in `RevenueChart.jsx` and `OrdersTable.jsx`.
+- Keep dashboard state in `App.jsx` and pass data/actions down as props. For example, `range`, `query`, and theme state are owned by `App`, while `Dashboard` derives filtered orders and summarized data.
+- Derive expensive or range-dependent values with `useMemo`, as `Dashboard` does for `summarize(range)`.
+- Centralize display formatting in `src/format.js`; currency, percentages, numbers, dates, and times should use the shared `fmt*` helpers rather than ad hoc formatting.
+- Recharts visualizations receive theme-dependent colors through props (`RevenueChart.jsx`, `CategoryChart.jsx`) and disable animation with `isAnimationActive={false}`.
+- Accessibility is explicit: landmark labels and heading relationships use `aria-label`/`aria-labelledby`; tables define `scope="col"`; interactive controls expose `aria-expanded`, `aria-haspopup`, `aria-current`, or `aria-checked` where applicable.
+- Never rely on color alone for status or chart identity. `OrdersTable.jsx` pairs status colors with icons and labels, while `RevenueChart.jsx` adds direct end labels and `ChartTooltip.jsx` includes swatches plus text names.
+- Interactive overlays and menus should clean up global listeners. Follow `Navbar.jsx`’s `useDismiss` pattern for outside-click and Escape dismissal.
+- Preserve native interaction where possible: `ProductCarousel.jsx` uses a focusable, horizontally scrollable `<ol>` with native scrolling, snap behavior, keyboard support, and reduced-motion handling.
+- Use stable domain identifiers as React keys: `k.key`, `o.id`, `p.sku`, or channel/category names rather than array indexes except where the index is only presentation metadata.
 
 ## Intentional non-standard choices
-- `src/data.js` deliberately generates deterministic sample data with a seeded `mulberry32` randomizer so the dashboard is visually stable between loads; it is explicitly intended to be replaced by API calls later.
-- Navigation links in `Sidebar.jsx` intentionally use `href="#"` and prevent default behavior because the sample dashboard has no routing.
-- Chart animations are disabled with `isAnimationActive={false}` to keep dashboard rendering stable.
-- KPI comparisons treat a zero/absent previous value as zero change in `KpiCard.jsx`.
+
+- `src/data.js` intentionally generates deterministic local sample data with seeded PRNGs (`mulberry32`) so the dashboard renders consistently; it is explicitly designed to be replaced by API calls later.
+- `src/main.jsx` intentionally wraps the app in `React.StrictMode`; apparent development-only duplicate initialization should not be “fixed” by removing Strict Mode.
+- Placeholder pages are intentional: `App.jsx` renders “This page hasn’t been built yet” for non-overview routes.
 
 ## Watch out for
-- Do not introduce random or time-dependent data generation without preserving the deterministic sample behavior in `src/data.js`.
-- Preserve the data-unit conventions: generated monetary values are numeric dollar amounts, while `fmtCents` is used for amounts/AOV requiring cents precision.
-- When adding channels or categories, update the corresponding constants, aggregation logic, chart series colors, and labels consistently (`src/data.js`, `src/theme.js`, and chart components).
-- Avoid removing accessible text when replacing icons or status indicators; color-only chart legends/statuses violate the patterns established in `Sidebar.jsx`, `OrdersTable.jsx`, and `RevenueChart.jsx`.
-- Changes to theme behavior must preserve OS preference fallback, localStorage persistence, and `<html data-theme>` updates in `src/theme.js`.
+
+- Do not introduce random, time-sensitive, or unseeded mock data into `src/data.js`; separate seeds are used so adding metrics/products does not shift unrelated generated values.
+- Preserve the current/previous range semantics in `summarize`: current data is `slice(-days)` and the comparison window is the preceding `days`.
+- Be careful with rate metrics in `KpiCard.jsx`: rates report percentage-point changes, while other metrics report relative percentage changes; `lowerIsBetter` changes color semantics only, not arrow direction.
+- Avoid hard-coded chart colors, missing direct labels, or status styling that removes the accompanying text/icon accessibility cues.
+- Maintain listener and observer cleanup in components using `useEffect`, especially `Navbar.jsx` and `ProductCarousel.jsx`.
