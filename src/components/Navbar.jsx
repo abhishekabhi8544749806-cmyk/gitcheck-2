@@ -161,9 +161,14 @@ export default function Navbar({ query, onQueryChange, onMenu, showNotifications
         {signedIn ? (
           <UserMenu onSignOut={() => setSignedIn(false)} />
         ) : (
-          <button className="btn-primary" onClick={() => setSignedIn(true)}>
-            Log in
-          </button>
+          <>
+            <button className="btn-secondary" onClick={() => setSignedIn(true)}>
+              Log in
+            </button>
+            <button className="btn-primary" onClick={() => setSignedIn(true)}>
+              Sign up
+            </button>
+          </>
         )}
       </div>
     </header>
